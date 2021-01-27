@@ -2,20 +2,60 @@ class Number:
     def __init__(self, value):
         self.value = value
 
+    def __str__(self):
+        return self.value.__str__()
+
+    def __repr__(self):
+        return f'<<{self}>>'
+
+    @staticmethod
+    def is_reducible():
+        return False
+
 
 class Add:
     def __init__(self, left, right):
-        pass
+        self.left = left
+        self.right = right
+
+    def __str__(self):
+        return f'{self.left} + {self.right}'
+
+    def __repr__(self):
+        return f'<<{self}>>'
+
+    @staticmethod
+    def is_reducible():
+        return True
+
+    def reduce(self):
+        if self.left.is_reducible():
+            return Add(self.left.reduce(), self.right)
+        elif self.right.is_reducible():
+            return Add(self.left, self.right.reduce())
+        else:
+            return Number(self.left.value + self.right.value)
 
 
 class Multiply:
     def __init__(self, left, right):
-        pass
+        self.left = left
+        self.right = right
 
+    def __str__(self):
+        return f'{self.left} * {self.right}'
 
-ast = Add(
-    Multiply(Number(1), Number(2)),
-    Multiply(Number(3), Number(4))
-)
+    def __repr__(self):
+        return f'<<{self}>>'
 
-print(ast)
+    @staticmethod
+    def is_reducible():
+        return True
+
+    def reduce(self):
+        if self.left.is_reducible():
+            return Multiply(self.left.reduce(), self.right)
+        elif self.right.is_reducible():
+            return Multiply(self.left, self.right.reduce())
+        else:
+            return Number(self.left.value * self.right.value)

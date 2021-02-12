@@ -28,11 +28,11 @@ class Add:
     def is_reducible():
         return True
 
-    def reduce(self):
+    def reduce(self, environment):
         if self.left.is_reducible():
-            return Add(self.left.reduce(), self.right)
+            return Add(self.left.reduce(environment), self.right)
         elif self.right.is_reducible():
-            return Add(self.left, self.right.reduce())
+            return Add(self.left, self.right.reduce(environment))
         else:
             return Number(self.left.value + self.right.value)
 
@@ -52,21 +52,21 @@ class Multiply:
     def is_reducible():
         return True
 
-    def reduce(self):
+    def reduce(self, environment):
         if self.left.is_reducible():
-            return Multiply(self.left.reduce(), self.right)
+            return Add(self.left.reduce(environment), self.right)
         elif self.right.is_reducible():
-            return Multiply(self.left, self.right.reduce())
+            return Add(self.left, self.right.reduce(environment))
         else:
             return Number(self.left.value * self.right.value)
 
-
 class Machine:
-    def __init__(self, expression):
+    def __init__(self, expression, environment):
         self.expression = expression
+        self.environment = environment
 
     def step(self):
-        self.expression = self.expression.reduce()
+        self.expression = self.expression.reduce(self.environment)
 
     def run(self):
         while self.expression.is_reducible():
@@ -106,17 +106,28 @@ class LessThan:
     def is_reducible():
         return True
 
-    def reduce(self):
+    def reduce(self, environment):
         if self.left.is_reducible():
-            return LessThan(self.left.reduce(), self.right)
+            return LessThan(self.left.reduce(environment), self.right)
         elif self.right.is_reducible():
-            return LessThan(self.left, self.right.reduce())
+            return LessThan(self.left, self.right.reduce(environment))
         else:
             return Boolean(self.left.value < self.right.value)
 
 
+class Variable:
+    def __init__(self, name):
+        self.name = name
 
+    def __str__(self):
+        return f'{self.name}'
 
+    def __repr__(self):
+        return f'<<{self}>>'
 
+    @staticmethod
+    def is_reducible():
+        return True
 
-
+    def reduce(self, environment):
+        return environment[self.name]

@@ -60,6 +60,7 @@ class Multiply:
         else:
             return Number(self.left.value * self.right.value)
 
+
 class Machine:
     def __init__(self, expression, environment):
         self.expression = expression
@@ -131,3 +132,17 @@ class Variable:
 
     def reduce(self, environment):
         return environment[self.name]
+
+
+class DoNothing:
+    def __str__(self):
+        return 'do-nothing'
+
+    def __repr__(self):
+        return f'<<{self}>>'
+
+    def __eq__(self, other_statement):
+        return isinstance(other_statement, DoNothing)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

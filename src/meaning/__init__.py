@@ -9,7 +9,7 @@ class Number:
         return f'<<{self}>>'
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return False
 
 
@@ -25,13 +25,13 @@ class Add:
         return f'<<{self}>>'
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return True
 
     def reduce(self, environment):
-        if self.left.is_reducible():
+        if self.left.reducible():
             return Add(self.left.reduce(environment), self.right)
-        elif self.right.is_reducible():
+        elif self.right.reducible():
             return Add(self.left, self.right.reduce(environment))
         else:
             return Number(self.left.value + self.right.value)
@@ -49,13 +49,13 @@ class Multiply:
         return f'<<{self}>>'
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return True
 
     def reduce(self, environment):
-        if self.left.is_reducible():
+        if self.left.reducible():
             return Add(self.left.reduce(environment), self.right)
-        elif self.right.is_reducible():
+        elif self.right.reducible():
             return Add(self.left, self.right.reduce(environment))
         else:
             return Number(self.left.value * self.right.value)
@@ -67,15 +67,14 @@ class Machine:
         self.environment = environment
 
     def step(self):
-        self.statement, self.environment= self.statement.reduce(self.environment)
+        self.statement, self.environment = self.statement.reduce(self.environment)
 
     def run(self):
-        while self.statement.is_reducible():
+        while self.statement.reducible():
             print(f'{self.statement}, {self.environment}')
             self.step()
 
         print(f'{self.statement}, {self.environment}')
-
 
 
 class Boolean:
@@ -89,7 +88,7 @@ class Boolean:
         return f'<<{self}>>'
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return False
 
 
@@ -105,13 +104,13 @@ class LessThan:
         return f'<<{self}>>'
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return True
 
     def reduce(self, environment):
-        if self.left.is_reducible():
+        if self.left.reducible():
             return LessThan(self.left.reduce(environment), self.right)
-        elif self.right.is_reducible():
+        elif self.right.reducible():
             return LessThan(self.left, self.right.reduce(environment))
         else:
             return Boolean(self.left.value < self.right.value)
@@ -128,7 +127,7 @@ class Variable:
         return f'<<{self}>>'
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return True
 
     def reduce(self, environment):
@@ -149,7 +148,7 @@ class DoNothing:
         return not self.__eq__(other)
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return False
 
 
@@ -165,11 +164,12 @@ class Assign:
         return f'<<{self}>>'
 
     @staticmethod
-    def is_reducible():
+    def reducible():
         return True
 
     def reduce(self, environment):
-        if self.expression.is_reducible():
+        if self.expression.reducible():
             return Assign(self.name, self.expression.reduce(environment)), environment
         else:
             return DoNothing(), environment | {self.name: self.expression}
+

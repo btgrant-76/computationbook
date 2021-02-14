@@ -62,19 +62,20 @@ class Multiply:
 
 
 class Machine:
-    def __init__(self, expression, environment):
-        self.expression = expression
+    def __init__(self, statement, environment):
+        self.statement = statement
         self.environment = environment
 
     def step(self):
-        self.expression = self.expression.reduce(self.environment)
+        self.statement, self.environment= self.statement.reduce(self.environment)
 
     def run(self):
-        while self.expression.is_reducible():
-            print(self.expression)
+        while self.statement.is_reducible():
+            print(f'{self.statement}, {self.environment}')
             self.step()
 
-        print(self.expression)
+        print(f'{self.statement}, {self.environment}')
+
 
 
 class Boolean:
@@ -146,3 +147,29 @@ class DoNothing:
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    @staticmethod
+    def is_reducible():
+        return False
+
+
+class Assign:
+    def __init__(self, name, expression):
+        self.name = name
+        self.expression = expression
+
+    def __str__(self):
+        return f'{self.name} = {self.expression}'
+
+    def __repr__(self):
+        return f'<<{self}>>'
+
+    @staticmethod
+    def is_reducible():
+        return True
+
+    def reduce(self, environment):
+        if self.expression.is_reducible():
+            return Assign(self.name, self.expression.reduce(environment)), environment
+        else:
+            return DoNothing(), environment | {self.name: self.expression}

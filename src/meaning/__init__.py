@@ -1,3 +1,5 @@
+# TODO before merging back to main, review this code vs. final state from the book
+
 class Number:
     def __init__(self, value):
         self.value = value
@@ -91,6 +93,15 @@ class Boolean:
     def reducible():
         return False
 
+    def __eq__(self, other):
+        if not isinstance(other, Boolean):
+            return False
+
+        return other.value == self.value
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class LessThan:
     def __init__(self, left, right):
@@ -173,3 +184,28 @@ class Assign:
         else:
             return DoNothing(), environment | {self.name: self.expression}
 
+
+class If:
+    def __init__(self, condition, consequence, alternative):
+        self.condition = condition
+        self.consequence = consequence
+        self.alternative = alternative
+
+    def __str__(self):
+        return f'if ({self.condition}) {{ {self.consequence} }} else {{ {self.alternative} }}'
+
+    def __repr__(self):
+        return f'<<{self}>>'
+
+    @staticmethod
+    def reducible():
+        return True
+
+    def reduce(self, environment):
+        if self.condition.reducible():
+            return If(self.condition.reduce(environment), self.consequence, self.alternative), environment
+        else:
+            if self.condition == Boolean(True):
+                return self.consequence, environment
+            elif self.condition == Boolean(False):
+                return self.alternative, environment

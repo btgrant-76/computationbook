@@ -3,6 +3,9 @@
 
 - [Book site](https://computationbook.com/)
   - [Sample code](https://computationbook.com/code)
+  
+
+This project was written using Python 3.9.
 
 
 # Tips and Tricks

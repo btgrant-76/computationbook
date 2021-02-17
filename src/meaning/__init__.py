@@ -209,3 +209,26 @@ class If:
                 return self.consequence, environment
             elif self.condition == Boolean(False):
                 return self.alternative, environment
+
+
+class Sequence:
+    def __init__(self, first, second):
+        self.first = first
+        self.second = second
+
+    def __str__(self):
+        return f'{self.first}; {self.second}'
+
+    def __repr__(self):
+        return f'<<{self}>>'
+
+    @staticmethod
+    def reducible():
+        return True
+
+    def reduce(self, environment):
+        if isinstance(self.first, DoNothing):
+            return self.second, environment
+        else:
+            reduced_first, reduced_environment = self.first.reduce(environment)
+            return Sequence(reduced_first, self.second), reduced_environment

@@ -56,9 +56,9 @@ class Multiply:
 
     def reduce(self, environment):
         if self.left.reducible():
-            return Add(self.left.reduce(environment), self.right)
+            return Multiply(self.left.reduce(environment), self.right)
         elif self.right.reducible():
-            return Add(self.left, self.right.reduce(environment))
+            return Multiply(self.left, self.right.reduce(environment))
         else:
             return Number(self.left.value * self.right.value)
 
@@ -232,3 +232,22 @@ class Sequence:
         else:
             reduced_first, reduced_environment = self.first.reduce(environment)
             return Sequence(reduced_first, self.second), reduced_environment
+
+
+class While:
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+    def __str__(self):
+        return f'while ({self.condition}) {{ {self.body} }}'
+
+    def __repr__(self):
+        return f'<<{self}>>'
+
+    @staticmethod
+    def reducible():
+        return True
+
+    def reduce(self, environment):
+        return If(self.condition, Sequence(self.body, self), DoNothing()), environment

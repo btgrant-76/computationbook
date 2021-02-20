@@ -32,11 +32,11 @@ class Add:
 
     def reduce(self, environment):
         if self.left.reducible():
-            return Add(self.left.reduce(environment), self.right)
+            return Add(self.left.reduce(environment), self.right), environment
         elif self.right.reducible():
-            return Add(self.left, self.right.reduce(environment))
+            return Add(self.left, self.right.reduce(environment)), environment
         else:
-            return Number(self.left.value + self.right.value)
+            return Number(self.left.value + self.right.value), environment
 
 
 class Multiply:

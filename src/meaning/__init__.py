@@ -17,6 +17,9 @@ class Number:
     def evaluate(self, environment):
         return self
 
+    def to_python(self):
+        return f'lambda e: {self.value}'
+
 
 class Add:
     def __init__(self, left, right):
@@ -44,6 +47,9 @@ class Add:
     def evaluate(self, environment):
         return Number(self.left.evaluate(environment).value + self.right.evaluate(environment).value)
 
+    def to_python(self):
+        return f'lambda e: ({self.left.to_python()})(e) + ({self.right.to_python()})(e)'
+
 
 class Multiply:
     def __init__(self, left, right):
@@ -70,6 +76,9 @@ class Multiply:
 
     def evaluate(self, environment):
         return Number(self.left.evaluate(environment).value * self.right.evaluate(environment).value)
+
+    def to_python(self):
+        return f'lambda e: ({self.left.to_python()})(e) * ({self.right.to_python()})(e)'
 
 
 class Machine:
@@ -114,6 +123,9 @@ class Boolean:
     def evaluate(self, environment):
         return self
 
+    def to_python(self):
+        return f'lambda e: {self.value}'
+
 
 class LessThan:
     def __init__(self, left, right):
@@ -141,6 +153,9 @@ class LessThan:
     def evaluate(self, environment):
         return Boolean(self.left.evaluate(environment).value < self.right.evaluate(environment).value)
 
+    def to_python(self):
+        return f'lambda e: ({self.left.to_python()})(e) < ({self.right.to_python()})(e)'
+
 
 class Variable:
     def __init__(self, name):
@@ -161,6 +176,9 @@ class Variable:
 
     def evaluate(self, environment):
         return environment[self.name]
+
+    def to_python(self):
+        return f'lambda e: e["{self.name}"]'
 
 
 class DoNothing:

@@ -14,6 +14,9 @@ class Number:
     def reducible():
         return False
 
+    def evaluate(self, environment):
+        return self
+
 
 class Add:
     def __init__(self, left, right):
@@ -38,6 +41,9 @@ class Add:
         else:
             return Number(self.left.value + self.right.value), environment
 
+    def evaluate(self, environment):
+        return Number(self.left.evaluate(environment).value + self.right.evaluate(environment).value)
+
 
 class Multiply:
     def __init__(self, left, right):
@@ -61,6 +67,9 @@ class Multiply:
             return Multiply(self.left, self.right.reduce(environment))
         else:
             return Number(self.left.value * self.right.value)
+
+    def evaluate(self, environment):
+        return Number(self.left.evaluate(environment).value * self.right.evaluate(environment).value)
 
 
 class Machine:
@@ -102,6 +111,9 @@ class Boolean:
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def evaluate(self, environment):
+        return self
+
 
 class LessThan:
     def __init__(self, left, right):
@@ -126,6 +138,9 @@ class LessThan:
         else:
             return Boolean(self.left.value < self.right.value)
 
+    def evaluate(self, environment):
+        return Boolean(self.left.evaluate(environment).value < self.right.evaluate(environment).value)
+
 
 class Variable:
     def __init__(self, name):
@@ -142,6 +157,9 @@ class Variable:
         return True
 
     def reduce(self, environment):
+        return environment[self.name]
+
+    def evaluate(self, environment):
         return environment[self.name]
 
 
@@ -161,6 +179,9 @@ class DoNothing:
     @staticmethod
     def reducible():
         return False
+
+    def evaluate(self, environment):
+        return environment
 
 
 class Assign:
@@ -183,6 +204,9 @@ class Assign:
             return Assign(self.name, self.expression.reduce(environment)), environment
         else:
             return DoNothing(), environment | {self.name: self.expression}
+
+    def evaluate(self, environment):
+        return environment | {self.name: self.expression.evaluate(environment)}
 
 
 class If:
@@ -210,6 +234,13 @@ class If:
             elif self.condition == Boolean(False):
                 return self.alternative, environment
 
+    def evaluate(self, environment):
+        evaluated = self.condition.evaluate(environment)
+        if evaluated == Boolean(True):
+            return self.consequence.evaluate(environment)
+        elif evaluated == Boolean(False):
+            return self.alternative.evaluate(environment)
+
 
 class Sequence:
     def __init__(self, first, second):
@@ -233,6 +264,9 @@ class Sequence:
             reduced_first, reduced_environment = self.first.reduce(environment)
             return Sequence(reduced_first, self.second), reduced_environment
 
+    def evaluate(self, environment):
+        return self.second.evaluate(self.first.evaluate(environment))
+
 
 class While:
     def __init__(self, condition, body):
@@ -251,3 +285,10 @@ class While:
 
     def reduce(self, environment):
         return If(self.condition, Sequence(self.body, self), DoNothing()), environment
+
+    def evaluate(self, environment):
+        cond_evaluation = self.condition.evaluate(environment)
+        if cond_evaluation == Boolean(True):
+            return self.evaluate(self.body.evaluate(environment))
+        elif cond_evaluation == Boolean(False):
+            return environment

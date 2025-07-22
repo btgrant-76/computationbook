@@ -198,8 +198,13 @@ class DoNothing:
     def reducible():
         return False
 
-    def evaluate(self, environment):
+    @staticmethod
+    def evaluate(environment):
         return environment
+
+    @staticmethod
+    def to_python():
+        return f'lambda e: e'
 
 
 class Assign:
@@ -225,6 +230,9 @@ class Assign:
 
     def evaluate(self, environment):
         return environment | {self.name: self.expression.evaluate(environment)}
+
+    def to_python(self):
+        return f'lambda e: e | {{"{self.name}": ({self.expression.to_python()})(e) }}'
 
 
 class If:
@@ -259,6 +267,10 @@ class If:
         elif evaluated == Boolean(False):
             return self.alternative.evaluate(environment)
 
+    def to_python(self):
+        return f'lambda e: ({self.consequence.to_python()})(e) if ({self.condition.to_python()})(e) ' \
+               f'else ({self.alternative.to_python()})(e)'
+
 
 class Sequence:
     def __init__(self, first, second):
@@ -284,6 +296,9 @@ class Sequence:
 
     def evaluate(self, environment):
         return self.second.evaluate(self.first.evaluate(environment))
+
+    def to_python(self):
+        return f'lambda e: ({self.second.to_python()})({self.first.to_python()})(e))'
 
 
 class While:
